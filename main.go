@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 var conferenceName = "Go Conference"
@@ -36,6 +37,9 @@ func main() {
 
 			//book a ticket
 			bookTicket(userTickets, firstName, lastName, email)
+
+			//send a ticket
+			sendTicket(userTickets, firstName, lastName, email)
 
 			// call function to iterate through bookings list to print only names
 			firstNames := getFirstNames()
@@ -122,4 +126,12 @@ func inputValidation(firstName string, lastName string, email string, userTicket
 	isValidEmail := strings.Contains(email, "@")
 	isValidTicketNumber := userTickets > 0 && userTickets <= remainingTickets
 	return isValidName, isValidEmail, isValidTicketNumber
+}
+
+func sendTicket(userTickets uint, firstName string, lastName string, email string) {
+	time.Sleep(5 * time.Second)
+	var ticket = fmt.Sprintf("%v tickets for %v %v", userTickets, firstName, lastName)
+	fmt.Println("##################")
+	fmt.Printf("Sending ticket:\n%v\nto email adress %v\n", ticket, email)
+	fmt.Println("##################")
 }
