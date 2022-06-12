@@ -1,2 +1,2 @@
 # booking-app
-Booking app. Go study.
+Booking app. The Go study.
