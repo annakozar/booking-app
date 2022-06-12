@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -19,51 +20,51 @@ type UserData struct {
 	isOptedForNewsLetter bool
 }
 
+var wg = sync.WaitGroup{}
+
 func main() {
 
 	//welcome message
 	greetUsers()
 
-	//for loop to ask to book tickets. store the name+surname in a slice.
-	for {
+	// get user input
+	firstName, lastName, email, userTickets := getUserInput()
 
-		// get user input
-		firstName, lastName, email, userTickets := getUserInput()
+	//check the name, email, amount of tickets
+	isValidName, isValidEmail, isValidTicketNumber := inputValidation(firstName, lastName, email, userTickets)
 
-		//check the name, email, amount of tickets
-		isValidName, isValidEmail, isValidTicketNumber := inputValidation(firstName, lastName, email, userTickets)
+	if isValidName && isValidEmail && isValidTicketNumber {
 
-		if isValidName && isValidEmail && isValidTicketNumber {
+		//book a ticket
+		bookTicket(userTickets, firstName, lastName, email)
 
-			//book a ticket
-			bookTicket(userTickets, firstName, lastName, email)
+		//send a ticket
+		wg.Add(1)
+		go sendTicket(userTickets, firstName, lastName, email)
 
-			//send a ticket
-			sendTicket(userTickets, firstName, lastName, email)
+		// call function to iterate through bookings list to print only names
+		firstNames := getFirstNames()
+		fmt.Printf("the first names of our bookings: %v\n", firstNames)
 
-			// call function to iterate through bookings list to print only names
-			firstNames := getFirstNames()
-			fmt.Printf("the first names of our bookings: %v\n", firstNames)
-
-			//break when user tries to overbook
-			if remainingTickets == 0 {
-				//end program
-				fmt.Println("our conference is booked up. come back next year.")
-				break
-			}
-		} else {
-			if !isValidName {
-				fmt.Println("Your name or surname is too short")
-			}
-			if !isValidEmail {
-				fmt.Println("Your email is wrong")
-			}
-			if !isValidTicketNumber {
-				fmt.Println("Your value of tickets is invalid")
-			}
+		//break when user tries to overbook
+		if remainingTickets == 0 {
+			//end program
+			fmt.Println("our conference is booked up. come back next year.")
+			//break
+		}
+	} else {
+		if !isValidName {
+			fmt.Println("Your name or surname is too short")
+		}
+		if !isValidEmail {
+			fmt.Println("Your email is wrong")
+		}
+		if !isValidTicketNumber {
+			fmt.Println("Your value of tickets is invalid")
 		}
 
 	}
+	wg.Wait()
 
 }
 
@@ -134,4 +135,5 @@ func sendTicket(userTickets uint, firstName string, lastName string, email strin
 	fmt.Println("##################")
 	fmt.Printf("Sending ticket:\n%v\nto email adress %v\n", ticket, email)
 	fmt.Println("##################")
+	wg.Done()
 }
